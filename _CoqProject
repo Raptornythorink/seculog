@@ -1,9 +1,6 @@
--R . TP2
+-R . Compil 
 Tactics.v
 While.v
-WhileBigStep.v
-WhileSmallStep.v
-Equiv.v
-Interp.v
-Hoare.v
-UseHoare.v
+Fac.v
+Stk.v
+While2Stk.v
