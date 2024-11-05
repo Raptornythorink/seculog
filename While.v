@@ -71,7 +71,9 @@ Fixpoint eval_expr (env: state) (e: expr) : val :=
   match e with
   | Const n => n
   | Var v => env v
-  | _ => 0
+  | Add e1 e2 => (eval_expr env e1) + (eval_expr env e2)
+  | Mul e1 e2 => (eval_expr env e1) * (eval_expr env e2)
+  | Sub e1 e2 => (eval_expr env e1) - (eval_expr env e2)
   end.
 
 Compute
@@ -87,30 +89,47 @@ Fixpoint eval_cond (env: state) (c: cond) : bool :=
   match c with
   | Eq e1 e2 => Z.eqb (eval_expr env e1) (eval_expr env e2)
   | Lt e1 e2 => Z.ltb (eval_expr env e1) (eval_expr env e2)
-  | _ => false
+  | And c1 c2 => (eval_cond env c1) && (eval_cond env c2)
+  | Or c1 c2 => (eval_cond env c1) || (eval_cond env c2)
+  | Not c => negb (eval_cond env c)
   end.
 
 Fixpoint eval_condP (env: state) (c: cond) : Prop :=
   match c with
   | Eq e1 e2 => (eval_expr env e1) = (eval_expr env e2)
   | Lt e1 e2 => (eval_expr env e1) < (eval_expr env e2)
-  | _ => False
+  | And c1 c2 => (eval_condP env c1) /\ (eval_condP env c2)
+  | Or c1 c2 => (eval_condP env c1) \/ (eval_condP env c2)
+  | Not c => ~ (eval_condP env c)
   end.
 
 Lemma eval_cond_true:
   forall env c, eval_condP env c <-> eval_cond env c = true.
 Proof.
-Admitted.
+  induction c.
+  - simpl. rewrite Z.eqb_eq. tauto.
+  - simpl. rewrite Z.ltb_lt. tauto.
+  - simpl. rewrite Bool.andb_true_iff. tauto.
+  - simpl. rewrite Bool.orb_true_iff. tauto.
+  - simpl. rewrite Bool.negb_true_iff. rewrite IHc. apply Bool.not_true_iff_false.
+Qed.
 
 Lemma eval_cond_false:
   forall env c, ~ eval_condP env c <-> eval_cond env c = false.
 Proof.
-Admitted.
+  intros env c.
+  rewrite eval_cond_true.
+  apply Bool.not_true_iff_false.
+Qed.
 
 Lemma eval_cond_dec:
   forall env c, {eval_condP env c} + {~ eval_condP env c}.
 Proof.
-Admitted.                  (* à remplacer par Defined. quand vous aurez fini. *)
+    intros env c.
+    destruct (eval_cond env c) eqn:H.
+    - left. apply eval_cond_true. apply H.
+    - right. apply eval_cond_false. apply H. 
+Defined.                  (* à remplacer par Defined. quand vous aurez fini. *)
 (* Defined permet de rendre les définitions *transparentes*, et pourront donc
 être évaluées par la commande Compute. *)
 
@@ -129,4 +148,3 @@ Inductive stmt  :=
 | Seq (s1 s2: stmt)
 | If (c: cond) (s1 s2: stmt)
 | While (c: cond) (I: state -> Prop) (s: stmt).
-
