@@ -152,7 +152,7 @@ Proof.
       apply H.
     + apply H0.
  - apply H1. 
-Admitted.
+Qed.
 
 Open Scope Z_scope.
 
