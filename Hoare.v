@@ -169,7 +169,7 @@ Definition factorielle n :=
     ).
 
 (* Cette preuve devrait passer *)
-(*
+
 Lemma fact_correct_first_try:
   forall n, n >= 0 ->
             valid_hoare_triple (fun env => env "n" = n) (factorielle n) (fun env => env "res" = Zfact n).
@@ -190,7 +190,7 @@ Proof.
     rewrite Zfact_neg. 2: lia. lia.
   - unfold update_state; simpl. auto.
 Qed.
-*)
+
 
 Fixpoint vars_affected (s: stmt) : list var :=
   match s with
